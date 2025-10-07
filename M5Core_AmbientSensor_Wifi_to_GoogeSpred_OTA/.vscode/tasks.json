@@ -1,0 +1,18 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "PlatformIO: Upload OTA (Direct)",
+            "type": "shell",
+            "command": "pio",
+            "args": [
+                "run", 
+                "-e", "ota", 
+                "-t", "upload",
+                "--upload-port", "esp32-0D1818.local"
+            ],
+            "problemMatcher": ["$platformio"],
+            "group": "build"
+        }
+    ]
+}

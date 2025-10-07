@@ -1,0 +1,29 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "PlatformIO: Upload OTA",
+            "type": "shell",
+            "command": "pio",
+            "args": ["run", "-e", "ota", "-t", "upload"],
+            "problemMatcher": ["$platformio"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "PlatformIO: Upload USB",
+            "type": "shell",
+            "command": "pio",
+            "args": ["run", "-e", "m5stack-core-esp32-16M", "-t", "upload"],
+            "problemMatcher": ["$platformio"],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        }
+    ]
+}
