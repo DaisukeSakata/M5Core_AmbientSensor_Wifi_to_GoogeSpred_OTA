@@ -1,6 +1,6 @@
 ![Image](https://github.com/user-attachments/assets/9d236f35-74f4-455c-9ed3-52cc6fad22c8)
 # M5Core_AmbientSensor_Wifi_to_GoogleSpred_OTA
- M5Core+風速風向温度湿度気圧ｰWiFIｰ>ambient
+ M5Core+風速風向温度湿度気圧ｰWiFIｰ>GoogleSpredSheet
 
 M5StackのArduino開発で、QMC5883L磁気センサーの追加と風向データの改善機能を実装　OTAは機能していません
 
