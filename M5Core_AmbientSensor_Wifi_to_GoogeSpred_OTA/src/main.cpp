@@ -1,4 +1,5 @@
-// chatGPT生成のちcloudeにより修正      20250228 動作OK Wifiでambient接続 OTA追加ホスト名esp32-0D1818
+// googlSpredに変更 iotdata.sakata@gmail.com spredsheet連携
+// chatGPT生成のちcloudeにより修正     　 20250228 動作OK Wifiでambient接続 OTA追加ホスト名esp32-0D1818
 // OTA機能追加 OTAアップロードはターミナルからコマンドラインで　pio run -e ota -t upload　　詳細はvscode-upload-guide.md
 // QMC5883L磁気センサー追加、風向データ改善、表示制御機能追加
 // M5stackCore + W5500LANモジュール(PoE) + Core2ポート拡張モジュール
@@ -10,25 +11,34 @@
 #include <ArduinoOTA.h> // OTA機能
 #include <M5Unified.h>
 #include <Wire.h>
+#include <WiFi.h>
+#include <Arduino.h>
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
+
 #include <HardwareSerial.h>
 #include <TinyGPSPlus.h>
 #include <Adafruit_SHT4x.h>
 #include <Adafruit_BMP280.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include <WiFi.h>
 #include <QMC5883LCompass.h>  // QMC5883L磁気センサー
-#include "Ambient.h"  // ambientサーバー向け追加
+// #include "Ambient.h"  // ambientサーバー向け追加
+
+
 
 // Wifi設定
 WiFiClient client;
-Ambient ambient; 
+// Ambient ambient; 
 const char* ssid = "TP-Link_IoT_CA1D";
 const char* password = "85010642";
 
- // ambientサーバー
-unsigned int channelId = 88227; // AmbientのチャネルID  shimojima+ambient@gmail.com sakata.daisuke.job@gmail.com
-const char* writeKey = "897bd84bb0371f2f"; // ライトキー
+// ambientサーバー
+// unsigned int channelId = 88227; // AmbientのチャネルID  shimojima+ambient@gmail.com sakata.daisuke.job@gmail.com
+// const char* writeKey = "897bd84bb0371f2f"; // ライトキー
+
+// Google Apps ScriptのWebアプリURL
+const char* gasUrl = "https://script.google.com/macros/s/AKfycbyhX0pWexua2ZjGg48G8J0k9kWXx6WTXR7GS53hRtT6DodWd_I0RINt8f0CBs8Vh8Be/exec"; // 上記でコピーしたURLに置き換えてください
 
 // *** UART: GPSモジュール ***
 #define GPS_RX 16
@@ -395,8 +405,8 @@ void setup() {
     M5.Lcd.printf("OTA: %s.local\n", ArduinoOTA.getHostname().c_str());
 
     // ambient初期化
-    ambient.begin(channelId, writeKey, &client);
-    M5.Lcd.println("Ambient connected");
+    // ambient.begin(channelId, writeKey, &client);
+    // M5.Lcd.println("Ambient connected");
 
     // GPS 初期化
     gpsSerial.begin(9600, SERIAL_8N1, GPS_RX, GPS_TX);
@@ -664,17 +674,69 @@ void loop() {
         }
 
         // Ambient送信
-        ambient.set(1, temperature);
-        ambient.set(2, humidity);
-        ambient.set(3, pressure);
-        ambient.set(4, windSpeed);
-        ambient.set(5, correctedWindDir >= 0 ? correctedWindDir : -999);  // 補正された風向
-        ambient.set(6, windVariability);  // 風向変動指標
-        ambient.set(7, waterTemp);
+        // ambient.set(1, temperature);
+        // ambient.set(2, humidity);
+        // ambient.set(3, pressure);
+        // ambient.set(4, windSpeed);
+        // ambient.set(5, correctedWindDir >= 0 ? correctedWindDir : -999);  // 補正された風向
+        // ambient.set(6, windVariability);  // 風向変動指標
+        // ambient.set(7, waterTemp);
 
-        ambient.send();
-        Serial.println("Data sent to Ambient");
+        // ambient.send();
+        // Serial.println("Data sent to Ambient");
         
+        // DynamicJsonDocument doc(256);
+        JsonDocument doc; // 
+        doc["temperature"] = temperature;
+        doc["humidity"] = humidity;
+        doc["pressure"] = pressure;
+        doc["windspeed"] = windSpeed;
+        doc["correctedWindDir"] = correctedWindDir;
+        doc["windVariability"] = windVariability;
+        doc["waterTemp"] = waterTemp;
+
+        String jsonString;
+        serializeJson(doc, jsonString);
+
+        if (WiFi.status() == WL_CONNECTED) {
+            HTTPClient http;
+            http.begin(gasUrl);
+            http.addHeader("Content-Type", "application/json");
+
+            int httpResponseCode = http.POST(jsonString);
+
+            if (httpResponseCode > 0) {
+                M5.Lcd.printf("HTTP Response code: %d\n", httpResponseCode);
+                Serial.printf("HTTP Response code: %d\n", httpResponseCode);
+
+                // レスポンスコードが302 (Moved Temporarily) の場合は、サーバーからのHTMLレスポンスを表示しない
+                if (httpResponseCode != 302) { // ★ここを数値の 302 に修正しました★
+                String response = http.getString();
+                M5.Lcd.printf("Server Response: %s\n", response.c_str());
+                Serial.printf("Server Response: %s\n", response.c_str());
+                } else {
+                M5.Lcd.println("Server responded with 302 Redirect (Data sent).");
+                Serial.println("Server responded with 302 Redirect (Data sent).");
+                }
+            } else {
+                M5.Lcd.printf("Error code: %d\n", httpResponseCode);
+                M5.Lcd.printf("Error: %s\n", http.errorToString(httpResponseCode).c_str());
+                Serial.printf("Error code: %d\n", httpResponseCode);
+                Serial.printf("Error: %s\n", http.errorToString(httpResponseCode).c_str());
+            }
+            http.end();
+        } else {
+            M5.Lcd.println("WiFi Disconnected. Reconnecting...");
+            Serial.println("WiFi Disconnected. Reconnecting...");
+            WiFi.begin(ssid, password);
+            while (WiFi.status() != WL_CONNECTED) {
+                delay(500);
+                M5.Lcd.print(".");
+                Serial.print(".");
+            }
+            M5.Lcd.println("\nWiFi Reconnected!");
+            Serial.println("\nWiFi Reconnected!");
+        }
         if (displayOn) {
             M5.Lcd.println("Data sent!");
         }
