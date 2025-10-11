@@ -38,7 +38,7 @@ const char* password = "85010642";
 // const char* writeKey = "897bd84bb0371f2f"; // ライトキー
 
 // Google Apps ScriptのWebアプリURL
-const char* gasUrl = "https://script.google.com/macros/s/AKfycbyhX0pWexua2ZjGg48G8J0k9kWXx6WTXR7GS53hRtT6DodWd_I0RINt8f0CBs8Vh8Be/exec"; // 上記でコピーしたURLに置き換えてください
+const char* gasUrl = "https://script.google.com/macros/s/AKfycbx8TPNzgzht07u5ihq26bhuNbtcR2nqSx8RjwYWYOQ5Ac-hfePniRvLIs-VZrqCwdm0/exec"; // 上記でコピーしたURLに置き換えてください
 
 // *** UART: GPSモジュール ***
 #define GPS_RX 16
