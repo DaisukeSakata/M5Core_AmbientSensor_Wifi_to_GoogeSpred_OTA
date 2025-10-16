@@ -1,4 +1,4 @@
-// googlSpredに変更 iotdata.sakata@gmail.com spredsheet連携
+// googlSpredに変更 iotdata.sakata@gmail.com spredsheet連携　googleAppsScript利用 20251016修正
 // chatGPT生成のちcloudeにより修正     　 20250228 動作OK Wifiでambient接続 OTA追加ホスト名esp32-0D1818
 // OTA機能追加 OTAアップロードはターミナルからコマンドラインで　pio run -e ota -t upload　　詳細はvscode-upload-guide.md
 // QMC5883L磁気センサー追加、風向データ改善、表示制御機能追加
@@ -37,8 +37,8 @@ const char* password = "85010642";
 // unsigned int channelId = 88227; // AmbientのチャネルID  shimojima+ambient@gmail.com sakata.daisuke.job@gmail.com
 // const char* writeKey = "897bd84bb0371f2f"; // ライトキー
 
-// Google Apps ScriptのWebアプリURL
-const char* gasUrl = "https://script.google.com/macros/s/AKfycbx8TPNzgzht07u5ihq26bhuNbtcR2nqSx8RjwYWYOQ5Ac-hfePniRvLIs-VZrqCwdm0/exec"; // 上記でコピーしたURLに置き換えてください
+// Google Apps ScriptのWebアプリURL データ取り込み、風向値の風向方位変換、1時間気圧差変換 20251016
+const char* gasUrl = "https://script.google.com/macros/s/AKfycbwN9kImFUZ4yYR9TtIwrSSQEFLy5_869KWyZIUCMry1LvmV58ryem-AmEkEKbXmLLNf/exec"; // 上記でコピーしたURLに置き換えてください
 
 // *** UART: GPSモジュール ***
 #define GPS_RX 16
